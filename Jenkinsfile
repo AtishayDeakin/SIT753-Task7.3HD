@@ -26,8 +26,8 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    bat 'sonar-scanner -Dsonar.projectKey=devops-sample -Dsonar.sources=.'
+                withCredentials([string(credentialsId: 'SonarQube', variable: 'SONAR_TOKEN')]) {
+                    bat "sonar-scanner -Dsonar.projectKey=SIT753-7.3HD -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN%"
                 }
             }
         }
