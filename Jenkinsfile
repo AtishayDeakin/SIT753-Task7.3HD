@@ -27,7 +27,7 @@ pipeline {
         stage('Code Quality') {
             steps {
                 withCredentials([string(credentialsId: 'a61bc67d-5a8e-4721-8a6a-b4c34ccd7207', variable: 'SONAR_TOKEN')]) {
-                    bat "sonar-scanner -Dsonar.projectKey=SIT753-7.3HD -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.token=%SONAR_TOKEN%"
+                    bat "sonar-scanner -Dsonar.token=%SONAR_TOKEN%"
                 }
             }
         }
