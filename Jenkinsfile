@@ -23,16 +23,17 @@ pipeline {
     }
     stage('Code Quality') {
       steps {
-        echo 'Run SonarQube analysis (placeholder)'
-        // withSonarQubeEnv('SonarQube') {
-        //   sh 'sonar-scanner'
-        // }
+        withSonarQubeEnv('SonarQube') {
+          sh 'sonar-scanner -Dsonar.projectKey=devops-sample -Dsonar.sources=.'
+        }
       }
     }
     stage('Security') {
       steps {
-        echo 'Run Snyk/Trivy scans (placeholder)'
-        // sh 'snyk test || true'
+        withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
+          sh 'snyk auth $SNYK_TOKEN'
+          sh 'snyk test || true'
+        }
       }
     }
     stage('Deploy to Staging') {
@@ -45,12 +46,16 @@ pipeline {
       steps {
         input message: 'Promote to production?', ok: 'Yes, release'
         sh 'docker tag $IMAGE devops-sample-api:latest'
-        // push to registry if configured
+        sh 'docker save $IMAGE -o devops-sample-api.tar'
+        archiveArtifacts artifacts: 'devops-sample-api.tar', fingerprint: true
       }
     }
     stage('Monitoring') {
       steps {
-        echo 'Ensure /metrics endpoint is reachable; integrate Prometheus/Grafana in production'
+        script {
+          def result = sh(script: "curl -s http://localhost:3000/metrics | head -n 5", returnStdout: true)
+          echo "Metrics output sample:\n${result}"
+        }
       }
     }
   }
